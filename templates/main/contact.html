@@ -1,0 +1,38 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+    <div class="mt-6 px-6 py-12 bg-gray-100 rounded-xl">
+        <h2 class="mb-12 text-2xl text-center">Contact Us</h2>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <h3 class="mb-4 text-lg font-semibold">Send us a message</h3>
+                <form action="{% url 'main:contact' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <label for="name" class="block mb-2 text-gray-700">Your Name</label>
+                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="email" class="block mb-2 text-gray-700">Your Email</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="message" class="block mb-2 text-gray-700">Message</label>
+                        <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-md" required></textarea>
+                    </div>
+                    <button type="submit" class="px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Send Message</button>
+                </form>
+            </div>
+            <div>
+                <h3 class="mb-4 text-lg font-semibold">Contact Information</h3>
+                <p class="text-gray-500">123 Example Street</p>
+                <p class="text-gray-500">City, State 12345</p>
+                <p class="text-gray-500">Email: info@example.com</p>
+                <p class="text-gray-500">Phone: 123-456-7890</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

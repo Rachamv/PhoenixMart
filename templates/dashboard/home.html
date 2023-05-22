@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Display user profile information -->
+    <h2>Profile Information</h2>
+    <p>Shipping Address: {{ user_profile.shipping_address }}</p>
+    <p>Contact Number: {{ user_profile.contact_number }}</p>
+
+    <!-- Display orders, payments, and deliveries -->
+    <!-- Add your code here -->
+
+    <!-- Order Form -->
+    <h2>Place Order</h2>
+    <form method="post" action="{% url 'dashboard:place_order' %}">
+        {% csrf_token %}
+        {{ order_form.as_p }}
+        <button type="submit">Place Order</button>
+    </form>
+{% endblock %}
