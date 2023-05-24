@@ -1,6 +1,21 @@
 from django import forms
 
 from .models import Item
+from .models import Category
+
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ('name',)
+
+class ItemForm(forms.ModelForm):
+    class Meta:
+        model = Item
+        fields = ('category', 'name', 'description', 'price', 'image', 'is_sold')
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
 
 INPUT_CLASSES = 'w-full py-4 px-6 rounded-xl border'
 

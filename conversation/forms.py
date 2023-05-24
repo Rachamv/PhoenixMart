@@ -6,4 +6,4 @@ class ConversationMessageForm(forms.ModelForm):
 
     class Meta:
         model = ConversationMessage
-        fields = ['content']
+        fields = ['content', 'conversation']

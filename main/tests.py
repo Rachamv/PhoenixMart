@@ -1,39 +1,21 @@
-from django.test import TestCase, Client
-from django.urls import reverse
+from django.test import TestCase
+from django.contrib.auth.models import User
 from .models import UserProfile
 
-class MainAppTestCase(TestCase):
+class MainTestCase(TestCase):
     def setUp(self):
-        self.client = Client()
-        # Create a user and user profile
-        self.user = User.objects.create_user(username='testuser', password='testpass')
-        self.user_profile = UserProfile.objects.create(
-            user=self.user, 
-            shipping_address='Test Address', 
-            contact_number='123456789'
-            )
+        self.user = User.objects.create(username='testuser')
+        self.user_profile = UserProfile.objects.create(user=self.user, first_name='John', last_name='Doe')
 
-    def test_index_view(self):
-        response = self.client.get(reverse('main:index'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'main/index.html')
-        
-        # Check if the user profile is passed to the template context
-        self.assertIn('user_profile', response.context)
-        self.assertEqual(response.context['user_profile'], self.user_profile)
-        
-        # Add more assertions to test the behavior of the index view
-        # For example, check if the items are passed to the template context
-        self.assertIn('items', response.context)
-        # Perform additional assertions as needed
+    def test_user_profile_creation(self):
+        self.assertEqual(self.user_profile.user, self.user)
+        self.assertEqual(self.user_profile.first_name, 'John')
+        self.assertEqual(self.user_profile.last_name, 'Doe')
 
-    def test_contact_view(self):
-            response = self.client.get(reverse('main:contact'))
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'main/contact.html')
+    def test_user_profile_str_representation(self):
+        expected_str = f'{self.user.username} - {self.user_profile.first_name} {self.user_profile.last_name}'
+        self.assertEqual(str(self.user_profile), expected_str)
 
-            # Add more assertions to test the behavior of the contact view
-            # For example, check if the page contains expected content
-            self.assertContains(response, "Contact Us")
-            self.assertContains(response, "Email: contact@example.com")
-            # Perform additional assertions as needed
+    def test_user_profile_full_name_property(self):
+        expected_full_name = f'{self.user_profile.first_name} {self.user_profile.last_name}'
+        self.assertEqual(self.user_profile.full_name, expected_full_name)

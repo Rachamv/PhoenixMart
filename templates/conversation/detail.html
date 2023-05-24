@@ -24,3 +24,51 @@
     <button class="py-4 px-8 text-lg bg-teal-500 hover:bg-teal-700 rounded-xl text-white">Send</button>
 </form>
 {% endblock %}
+
+
+<!--======================================================================================================-->
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Conversation Detail</h1>
+  <div id="message-container">
+    {% for message in conversation.messages.all %}
+      <p>{{ message.created_by.username }}: {{ message.content }}</p>
+    {% endfor %}
+  </div>
+  <form id="message-form">
+    {% csrf_token %}
+    {{ form.content }}
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const conversationId = {{ conversation.id }};
+    const chatSocket = new WebSocket(
+      `ws://{{ request.get_host }}/ws/conversation/${conversationId}/`
+    );
+
+    chatSocket.onmessage = function (e) {
+      const data = JSON.parse(e.data);
+      const messageContainer = document.querySelector('#message-container');
+      const messageElement = document.createElement('p');
+      messageElement.textContent = `${data.sender_id}: ${data.message}`;
+      messageContainer.appendChild(messageElement);
+    };
+
+    document.querySelector('#message-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const messageInput = document.querySelector('#id_content');
+      const message = messageInput.value;
+      chatSocket.send(
+        JSON.stringify({
+          message: message,
+          sender_id: {{ request.user.id }},
+        })
+      );
+      messageInput.value = '';
+    });
+  </script>
+{% endblock %}
