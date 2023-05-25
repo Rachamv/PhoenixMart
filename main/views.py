@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .forms import SignupForm, ProfileForm
@@ -32,17 +33,20 @@ def update_profile(request):
         'form': form,
     })
 
-
-def index(request):
+@login_required
+def home(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
     items = Item.objects.filter(is_sold=False)[0:6]
     categories = Category.objects.all()
 
-    return render(request, 'main/index.html', {
+    return render(request, 'main/home.html', {
         'categories': categories,
         'items': items,
     })
 
+def index(request):
+    return render(request, 'main/index.html')
+    
 def contact(request):
     return render(request, 'main/contact.html')
 
