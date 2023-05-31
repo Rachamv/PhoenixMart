@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{% static 'css/slicknav.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
 </head>
+
 <!-- BODY options, add following classes to body to change options
 
 // Header options
@@ -61,42 +62,13 @@ end--->
     {% include 'base/header.html' %}
      <!-- Header Section End -->
 
-    <!-- Hero Section Begin -->
-    {% include 'base/hero.html' %}
-     <!-- Hero Section End -->
-
-    <!-- Categories Section Begin -->
-    {% include 'base/categories.html' %}
-     <!-- Categories Section End -->
-
-    <!-- Featured Section Begin -->
-    {% include 'base/featured.html' %}
-     <!-- Featured Section End -->
-
-    <!-- Banner Begin -->
-    {% include 'base/banner.html' %}
-     <!-- Banner End -->
-
-    <!-- Latest Product Section Begin -->
-    {% include 'base/latest.html' %}
-     <!-- Latest Product Section End -->
-
-    <!-- Blog Section Begin -->
-    {% include 'base/blog_section.html' %}
-     <!-- Blog Section End -->
+     {% block content %}
+     {% endblock %}
 
     <!-- Footer Section Begin -->
     {% include 'base/footer.html' %}
      <!-- Footer Section End -->
     <!-- Js Plugins -->
-     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-     <script src="{% static 'js/bootstrap.min.js' %}"></script>
-     <script src="{% static 'js/jquery.nice-select.min.js' %}"></script>
-     <script src="{% static 'js/jquery-ui.min.js' %}"></script>
-     <script src="{% static 'js/jquery.slicknav.js' %}"></script>
-     <script src="{% static 'js/mixitup.min.js' %}"></script>
-     <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'js/main.js' %}"></script>
- 
+    {% include 'base/all.js' %}
 </body>
 </html>

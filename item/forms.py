@@ -1,8 +1,5 @@
 from django import forms
-
-from .models import Item
-from .models import Category
-
+from .models import Item, Category
 
 class CategoryForm(forms.ModelForm):
     class Meta:

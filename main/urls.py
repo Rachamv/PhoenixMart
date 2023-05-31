@@ -11,11 +11,11 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('about/', views.about, name='about'),
     path('signup/', views.signup, name='signup'),
-    path('login/', views.login_view, name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='main/login.html'), name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('api/user-profile/', views.user_profile, name='user-profile'),
     path('api-auth/', include('rest_framework.urls')),
     path('api-token-auth/', obtain_auth_token),
-    
     path('conversation/', include('conversation.urls')),
 ]
 

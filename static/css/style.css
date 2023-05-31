@@ -1,10 +1,10 @@
 /******************************************************************
-  Template Name: Ogani
-  Description:  Ogani eCommerce  HTML Template
-  Author: Colorlib
-  Author URI: https://colorlib.com
+  Template Name: PhoenixMart eCommerce
+  Description:  PhoenixMart eCommerce  HTML Template
+  Author: Techie Nerd
+  Author URI: https://Techie Nerd.com
   Version: 1.0
-  Created: Colorlib
+  Created: Techie Nerd
 ******************************************************************/
 
 /*------------------------------------------------------------------
@@ -203,8 +203,8 @@ ol {
 	margin-top: -13px;
 	margin-left: -13px;
 	border-radius: 60px;
-	animation: loader 0.8s linear infinite;
 	-webkit-animation: loader 0.8s linear infinite;
+	animation: loader 0.8s linear infinite;
 }
 
 @keyframes loader {

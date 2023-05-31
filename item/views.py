@@ -1,122 +1,143 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .forms import NewItemForm, EditItemForm
-from .models import Category, Item
-from .serializers import CategorySerializer, ItemSerializer
+from main.forms import SignupForm, ProfileForm
+from main.models import UserProfile, UserToken
+from main.serializers import UserProfileSerializer
+from item.models import Category, Item
+from django.shortcuts import get_object_or_404
 
 @api_view(['GET'])
-def item_list(request):
-    items = Item.objects.filter(is_sold=False)
-    serializer = ItemSerializer(items, many=True)
+def user_profile(request):
+    user = request.user
+    profile = UserProfile.objects.get(user=user)
+    serializer = UserProfileSerializer(profile)
     return Response(serializer.data)
 
-@api_view(['GET'])
-def item_detail(request, pk):
-    item = get_object_or_404(Item, pk=pk)
-    serializer = ItemSerializer(item)
-    return Response(serializer.data)
-
-# Rest of the views...
-
-@login_required
 @api_view(['POST'])
+def update_profile(request):
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=user_profile)
+
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard:index')
+    else:
+        form = ProfileForm(instance=user_profile)
+
+    return render(request, 'dashboard/profile.html', {
+        'form': form,
+    })
+
+def index(request):
+    items = Item.objects.filter(is_sold=False)[0:6]
+    categories = Category.objects.all()
+
+    return render(request, 'main/index.html', {
+        'categories': categories,
+        'items': items,
+    })
+
+def contact(request):
+    return render(request, 'main/contact.html')
+
+def about(request):
+    return render(request, 'main/about.html')
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password1'])
+            user.save()
+
+            # Create a UserProfile for the user
+            UserProfile.objects.create(user=user)
+
+            # Automatically log in the user after signup
+            authenticated_user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password1']
+            )
+            login(request, authenticated_user)
+
+            return redirect('/dashboard/dashboard.html')
+    else:
+        form = SignupForm()
+
+    return render(request, 'main/signup.html', {
+        'form': form
+    })
+
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        login(request, user)
+        token, _ = UserToken.objects.get_or_create(user=user)
+        return Response({'token': token.token})
+    else:
+        return Response({'detail': 'Invalid username or password'}, status=400)
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('main:index')
+
+
+def item_list(request):
+    items = Item.objects.all()
+    return render(request, 'item/item_list.html', {'items': items})
+
+def item_detail(request, pk):
+    item = get_object_or_404(Item, pk=pk)  
+    return render(request, 'item/item_detail.html', {'item': item})
+
+from django.shortcuts import render, redirect
+from .forms import ItemForm
+
 def create_item(request):
-    serializer = ItemSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save(created_by=request.user)
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+    if request.method == 'POST':
+        form = ItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            item = form.save()
+            return redirect('item:item_detail', pk=item.pk)  
+    else:
+        form = ItemForm()
+    return render(request, 'item/create_item.html', {'form': form})
 
-@login_required
-@api_view(['PUT'])
 def update_item(request, pk):
-    item = get_object_or_404(Item, pk=pk, created_by=request.user)
-    serializer = ItemSerializer(instance=item, data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=400)
+    item = get_object_or_404(Item, pk=pk)
+    if request.method == 'POST':
+        form = ItemForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            item = form.save()
+            return redirect('item:item_detail.html', pk=item.pk) 
+    else:
+        form = ItemForm(instance=item)
+    return render(request, 'item/update_item.html', {'form': form})
 
-@login_required
-@api_view(['DELETE'])
 def delete_item(request, pk):
-    item = get_object_or_404(Item, pk=pk, created_by=request.user)
+    item = get_object_or_404(Item, pk=pk)
     item.delete()
-    return Response(status=204)
+    return redirect('item:item_list.html')
 
-############################################################################################################################# old code without api #######################################################################
+def category_list(request):
+    categories = Category.objects.all()
+    return render(request, 'category/category_list.html', {'categories': categories})
 
-# def items(request):
-#     query = request.GET.get('query', '')
-#     category_id = request.GET.get('category', 0)
-#     categories = Category.objects.all()
-#     items = Item.objects.filter(is_sold=False)
+def category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)  
+    return render(request, 'category/category_detail.html', {'category': category})
 
-#     if category_id:
-#         items = items.filter(category_id=category_id)
 
-#     if query:
-#         items = items.filter(Q(name__icontains=query) | Q(description__icontains=query))
 
-#     return render(request, 'item/items.html', {
-#         'items': items,
-#         'query': query,
-#         'categories': categories,
-#         'category_id': int(category_id)
-#     })
-
-# def detail(request, pk):
-#     item = get_object_or_404(Item, pk=pk)
-#     related_items = Item.objects.filter(category=item.category, is_sold=False).exclude(pk=pk)[0:3]
-
-#     return render(request, 'item/detail.html', {
-#         'item': item,
-#         'related_items': related_items
-#     })
-
-# @login_required
-# def new(request):
-#     if request.method == 'POST':
-#         form = NewItemForm(request.POST, request.FILES)
-
-#         if form.is_valid():
-#             item = form.save(commit=False)
-#             item.created_by = request.user
-#             item.save()
-
-#             return redirect('item:detail', pk=item.id)
-#     else:
-#         form = NewItemForm()
-
-#     return render(request, 'item/form.html', {
-#         'form': form,
-#         'title': 'New item',
-#     })
-
-# @login_required
-# def edit(request, pk):
-#     item = get_object_or_404(Item, pk=pk, created_by=request.user)
-
-#     if request.method == 'POST':
-#         form = EditItemForm(request.POST, request.FILES, instance=item)
-
-#         if form.is_valid():
-#             form.save()
-
-#             return redirect('item:detail', pk=item.id)
-#     else:
-#         form = EditItemForm(instance=item)
-
-#     return render(request, 'item/form.html', {
-#         'form': form,
-#         'title': 'Edit item',
-#     })
-
-# @login_required
-# def delete(request, pk):
-#     item = get_object_or_404(Item, pk=pk, created_by=request.user)
-#     item.delete()
-
-#     return redirect('dashboard:index')
